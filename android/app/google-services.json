@@ -1,0 +1,41 @@
+{
+  "project_info": {
+    "project_number": "92450680643",
+    "project_id": "del04-a7e1e",
+    "storage_bucket": "del04-a7e1e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:92450680643:android:02e8b9214a0eda8b86c9f6",
+        "android_client_info": {
+          "package_name": "com.example.del04"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "92450680643-1k0ot2ent8dqapa422t0nag6r4vm63b7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "9KRZZ7YWdMXbwKSmv7r1UGctvgHMurf5RFTe8mty",
+
+        }
+      ],
+      "_comment": "AIzaSyDsaesWSm9hLuJaK1ErEgyaa_rJyFWx5sc",
+      "services",: {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "92450680643-1k0ot2ent8dqapa422t0nag6r4vm63b7.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
