@@ -1,5 +1,4 @@
 import 'dart:io';
-//import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/foundation.dart';
@@ -11,7 +10,8 @@ import 'package:path/path.dart';
 import 'package:native_pdf_view/native_pdf_view.dart';
 import 'package:del04/api/pdf_api.dart';
 import 'package:del04/page/pdf_viewer_page.dart';
-import 'package:splashscreen/splashscreen.dart';
+/*import 'package:splashscreen/splashscreen.dart';*/
+
 
 /*void main() {
 
@@ -78,8 +78,7 @@ class _ImageUploadsState extends State<ImageUploads> {
 
   Future uploadFile() async {
     if (_photo == null) return;
-    const fileName = "Very_Danger_Bacteria";
-    const destination = 'files/$fileName';
+    const destination = 'Very_Danger_Bacteria/';
 
     try {
       final ref = firebase_storage.FirebaseStorage.instance
