@@ -5,34 +5,32 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
-// ignore: depend_on_referenced_packages
-import 'package:path/path.dart';
-import 'package:native_pdf_view/native_pdf_view.dart';
-import 'package:del04/api/pdf_api.dart';
-import 'package:del04/page/pdf_viewer_page.dart';
-/*import 'package:splashscreen/splashscreen.dart';*/
+import 'package:del04/splashscreen.dart';
+import 'package:del04/page/info_page.dart';
+import 'package:del04/data.dart';
+import 'package:dotted_border/dotted_border.dart';
+import 'package:iconsax/iconsax.dart';
 
+late String name, path , domain , phylum , clas , order , family , genus , species ;
+File? _photo;
 
-/*void main() {
-
-  runApp(
-      MaterialApp(
-        title: "Pick Image Camera",
-        home: ImageUploads() ,
-      )
-  );
-}*/   //main fn that doesn't work, but don't know why
-
+// ignore: prefer_typing_uninitialized_variables
+var image;
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   runApp(
-      const MaterialApp(
-        title: "Pick Image",
-        home: ImageUploads() ,
+      MaterialApp(
+          initialRoute: '/',
+          routes: {
+            '/': (context) => const Splash_screen(),
+            '/home': (context) => ImageUploads(),
+            '/home/info_page': (context) => Info_page()
+          }
       )
   );
 }
+
 
 class ImageUploads extends StatefulWidget {
   const ImageUploads({Key? key}) : super(key: key);
@@ -46,7 +44,7 @@ class _ImageUploadsState extends State<ImageUploads> {
   firebase_storage.FirebaseStorage storage =
       firebase_storage.FirebaseStorage.instance;
 
-  File? _photo;
+
   final ImagePicker _picker = ImagePicker();
 
   Future imgFromGallery() async {
@@ -55,7 +53,7 @@ class _ImageUploadsState extends State<ImageUploads> {
     setState(() {
       if (pickedFile != null) {
         _photo = File(pickedFile.path);
-        /*uploadFile();*/
+        image= _photo;
       } else {
         print('No image selected.');
       }
@@ -68,7 +66,7 @@ class _ImageUploadsState extends State<ImageUploads> {
     setState(() {
       if (pickedFile != null) {
         _photo = File(pickedFile.path);
-        /*uploadFile();*/
+        image= _photo;
       } else {
         // ignore: avoid_print
         print('No image selected.');
@@ -85,26 +83,17 @@ class _ImageUploadsState extends State<ImageUploads> {
           .ref(destination)
           .child('file/');
       await ref.putFile(_photo!);
-
-      /*final ref = FirebaseDatabase.instance.ref();
-      final snapshot = await ref.child('users/$userId').get();
-      if (snapshot.exists) {
-        print(snapshot.value);
-      } else {
-        print('No data available.');
-      }*/
-
     }
     catch (e) {
       if (kDebugMode) {
-        print('error occured');
+        print('Error occurred, try again.');
       }
     }
   }
 
   void _onLoading() {
     showDialog(
-      context: this.context,
+      context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
         return Dialog(
@@ -119,162 +108,141 @@ class _ImageUploadsState extends State<ImageUploads> {
         );
       },
     );
-    Future.delayed(const Duration(seconds: 3), () {
-      Navigator.pop(this.context); //pop dialog
-      uploadFile();
+
+    douploadingshit();
+    Future.delayed(const Duration(seconds: 10), () async {
+      Navigator.pop(context); //pop dialog
+      final ref = FirebaseDatabase.instance.ref();
+      final snapshot = await ref.child('BacDetect/Res').get();
+      name = (snapshot.value) as String;
+
+      const Data().setData();
+
+      if(name=='nill'){
+        fetch_errorM();
+      }
+      else{
+        Navigator.of(context).push(MaterialPageRoute(builder: (context)=>Info_page()));
+
+      }
     });
   }
+
+  Future<void> douploadingshit() async {
+    uploadFile();
+    DatabaseReference ref = FirebaseDatabase.instance.ref("");
+    await ref.update({
+      "confirm/state": "yes",
+    });
+  }
+
+  void fetch_errorM() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return Dialog(
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: const [
+              SizedBox(height: 80, width: 30),
+              Text("Could not analyze sample.\nPlease Retry or try another Image."),
+            ],
+          ),
+        );
+      },
+    );
+    Future.delayed(const Duration(seconds: 2), () async {
+      Navigator.pop(context); //pop dialog
+    });
+  }
+
+  //----------------------------------------------------------------------------
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('\t Baclens'),
+        backgroundColor: Colors.blueGrey.shade900,
       ),
-      body: Column(
-        children: <Widget>[
-          const SizedBox(
-            height: 32,
-          ),
-          Center(
-            child: GestureDetector(
+      body: SingleChildScrollView(
+        child: Column(
+          children: <Widget>[
+            const SizedBox(height: 80,),
+            Text('Upload your image file', style: TextStyle(fontSize: 25, color: Colors.grey.shade800, fontWeight: FontWeight.bold),),
+            const SizedBox(height: 10,),
+            Text('File should be jpg or png only', style: TextStyle(fontSize: 15, color: Colors.grey.shade500),),
+            const SizedBox(height: 20,),
+            GestureDetector(
               onTap: () {
                 _showPicker(context);
               },
-              child: CircleAvatar(
-                radius: 150,
-                backgroundColor: Colors.transparent,
-                child: _photo != null
-                    ? ClipRRect(
-                  borderRadius: BorderRadius.zero,
-                  child: Image.file(
-                    _photo!,
-                    width: 200,
-                    height: 200,
-                    fit: BoxFit.fitWidth,
-                  ),
-                )
-                    : Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10.0),
-                    color: Colors.white,
-
-                    boxShadow: const [
-                      BoxShadow(
-                          color: Colors.grey,
-                          blurRadius: 3.0,
-                          offset: Offset(1.0, 1.0))
-                    ],
-                  ),
-                  width: 100,
-                  height: 100,
-                  child: Icon(
-                    Icons.camera_alt,
-                    color: Colors.grey[800],
-                  ),
-                ),
+              child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 40.0, vertical: 20.0),
+                  child: DottedBorder(
+                    borderType: BorderType.RRect,
+                    radius: const Radius.circular(10),
+                    dashPattern: const [10, 5],
+                    strokeCap: StrokeCap.round,
+                    color: Colors.grey.shade900,
+                    child: Container(
+                      width: double.infinity,
+                      height: 150,
+                      decoration: BoxDecoration(
+                          color: Colors.blue.shade50.withOpacity(.3),
+                          borderRadius: BorderRadius.circular(10)
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Iconsax.document_upload5, color: Colors.grey.shade900, size: 40,),
+                          const SizedBox(height: 15,),
+                          Text('Click to choose image', style: TextStyle(fontSize: 15, color: Colors.grey.shade400),),
+                        ],
+                      ),
+                    ),
+                  )
               ),
             ),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              _onLoading();
-            },
-            style: ElevatedButton.styleFrom(
-                primary: Colors.blueAccent,
-                padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 10),
-                textStyle: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold)),
-            child: const Text('Upload'),
-          ),
-
-          Container(
-            width: 400,
-            height: 60,
-            padding: const EdgeInsets.fromLTRB(5.0, 39.0, 0.0, 2.0),
-              child: const Text("\t  Common Name:")
-          ),
-
-
-          Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(5.0),
-                color: Colors.white,
-
-                boxShadow: const [
-                  BoxShadow(
-                      color: Colors.grey,
-                      blurRadius: 1.0,
-                      offset: Offset(0.2, 0.2))
-                ],
-              ),
-              width: 375,
-              height: 60,
-              child: Column(
-                children: const [
-                  Expanded(child: Text("")),
-                ],
-              )
-          ),
-
-          Container(
-              width: 400,
-              height: 30,
-              padding: const EdgeInsets.fromLTRB(5.0, 10.0, 0.0, 2.0),
-              child: const Text("\t  Scientific Name:")
-          ),
-
-          Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(5.0),
-                color: Colors.white,
-
-                boxShadow: const [
-                  BoxShadow(
-                      color: Colors.grey,
-                      blurRadius: 1.0,
-                      offset: Offset(0.2, 0.2))
-                ],
-              ),
-              width: 375,
-              height: 60,
-              child: Column(
-                children: const [
-                  Expanded(child: Text("")),
-                ],
-              )
-          ),
-          Container(
-              /*width: 400,
-              height: 20,*/
-            padding: const EdgeInsets.fromLTRB(0, 25, 0, 0),
-            child: Column(
-              children: [
-                const Text("View PDF Document for more Information:"),
-                ElevatedButton(
-
-                  onPressed: () async {
-                    const path = 'assets/pdfs/1.pdf';
-                    final file = await PDFApi.loadAsset(path);
-                    // ignore: use_build_context_synchronously
-                    openPDF(context, file);
-                  },
-
-                  style: ElevatedButton.styleFrom(
-                    primary: Colors.red,
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                    textStyle: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold),),
-
-                  child: const Text('View PDF'),
-
-                ),
-              ],
-            ),
-          )
-        ],
+            _photo != null
+                ? Container(
+                padding: const EdgeInsets.all(15),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('            Selected File:',
+                      style: TextStyle(color: Colors.grey.shade400, fontSize: 15,  ),),
+                    const SizedBox(height:10),
+                    Container(
+                        padding: const EdgeInsets.all(5),
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(1),
+                            color: Colors.transparent,
+                        ),
+                        child: Center(
+                          child: ClipRRect(
+                              borderRadius: BorderRadius.circular(2),
+                              child: Image.file(_photo!, width: 200, height: 200, fit: BoxFit.fitWidth)
+                          ),
+                        )
+                    ),
+                    const SizedBox(height: 30,),
+                     MaterialButton(
+                       minWidth: double.infinity,
+                       height: 50,
+                       onPressed: () {
+                         _onLoading();
+                       },
+                       color: Colors.blueGrey.shade900,
+                       child: const Text('Upload', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),),
+                     )
+                  ],
+                ))
+                : Container(),
+            const SizedBox(height: 150,),
+          ],
+        ),
       ),
     );
   }
@@ -308,9 +276,4 @@ class _ImageUploadsState extends State<ImageUploads> {
           );
         });
   }
-
-  void openPDF(BuildContext context, File file) => Navigator.of(context).push(
-    MaterialPageRoute(builder: (context) => PDFViewerPage(file: file)),
-  );
-
 }
