@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_pdfview/flutter_pdfview.dart';
@@ -13,6 +12,7 @@ class PDFViewerPage extends StatefulWidget {
   }) : super(key: key);
 
   @override
+  // ignore: library_private_types_in_public_api
   _PDFViewerPageState createState() => _PDFViewerPageState();
 }
 
@@ -29,18 +29,19 @@ class _PDFViewerPageState extends State<PDFViewerPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(name),
+        backgroundColor: Colors.blueGrey.shade900,
         actions: pages >= 2
             ? [
           Center(child: Text(text)),
           IconButton(
-            icon: Icon(Icons.chevron_left, size: 32),
+            icon: const Icon(Icons.chevron_left, size: 32),
             onPressed: () {
               final page = indexPage == 0 ? pages : indexPage - 1;
               controller.setPage(page);
             },
           ),
           IconButton(
-            icon: Icon(Icons.chevron_right, size: 32),
+            icon: const Icon(Icons.chevron_right, size: 32),
             onPressed: () {
               final page = indexPage == pages - 1 ? 0 : indexPage + 1;
               controller.setPage(page);
